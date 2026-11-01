@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laporan We Love Cities</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: kop instansi + penghitung hari, tiga tab (Isi, Rekap, Laporan). Hijau daun sebagai satu-satunya aksen. */
+:root{
+  --bg:#F2F6F4; --surface:#FFFFFF; --ink:#14211C; --muted:#586A62; --line:#D3DED8;
+  --accent:#1B6B55; --accent-ink:#FFFFFF; --accent-soft:#DDEFE7;
+  --warn:#7A4E00; --warn-bg:#FFEFC6; --bad:#8F2A2A; --bad-bg:#FBE2DF;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1714; --surface:#17221E; --ink:#E6EFEA; --muted:#93A59C; --line:#2A3A34;
+    --accent:#4FBF9B; --accent-ink:#07201A; --accent-soft:#1E3A31;
+    --warn:#E8B84A; --warn-bg:#3A2E10; --bad:#F29A94; --bad-bg:#3D1D1B; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1714; --surface:#17221E; --ink:#E6EFEA; --muted:#93A59C; --line:#2A3A34;
+  --accent:#4FBF9B; --accent-ink:#07201A; --accent-soft:#1E3A31;
+  --warn:#E8B84A; --warn-bg:#3A2E10; --bad:#F29A94; --bad-bg:#3D1D1B; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header{padding-top:20px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between}
+.org{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(24px,5vw,34px);font-weight:800;margin-top:4px}
+.day{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.day button{width:40px;height:40px;border:0;background:transparent;border-radius:7px;font-size:20px;cursor:pointer}
+.day button:hover{background:var(--accent-soft)}
+.day output{min-width:104px;text-align:center;font-family:var(--f-display);font-weight:700;font-size:18px}
+.banner{margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--warn-bg);color:var(--warn);font-weight:500}
+nav{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{border:0;background:none;padding:12px 16px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding-top:20px}
+.panel[hidden]{display:none!important}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+label.lbl{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+select,input[type=url],input[type=text]{width:100%;min-height:46px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);}
+.who-row{display:flex;flex-wrap:wrap;gap:16px;align-items:end;justify-content:space-between}
+.who-row .pick{flex:1 1 320px;min-width:0}
+.score{font-family:var(--f-display);font-weight:800;font-size:40px;line-height:1}
+.score small{font-size:16px;color:var(--muted);font-weight:600}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.form{display:grid;gap:12px;margin-top:16px}
+.row{display:grid;grid-template-columns:120px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.row .pf{font-family:var(--f-display);font-weight:700;font-size:17px}
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-width:0}
+.t{min-height:48px;border-radius:9px;border:1.5px solid var(--line);background:var(--bg);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.t[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.t[aria-pressed="true"]::before{content:"✓"}
+.t:disabled{opacity:.5;cursor:not-allowed}
+a.open{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:10px 12px;white-space:nowrap}
+a.open:hover{background:var(--accent-soft)}
+span.open-off{font-size:12px;color:var(--muted);padding:0 6px;white-space:nowrap}
+.row.vote{grid-template-columns:120px 1fr auto}
+.row.vote .tg{grid-template-columns:1fr}
+.hint{color:var(--muted);font-size:13px;margin:10px 2px 0}
+details.links{margin-top:18px}
+details.links summary{cursor:pointer;font-weight:600;padding:8px 0}
+.lk{display:grid;gap:10px;margin-top:8px}
+.btn{min-height:44px;padding:8px 16px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:hover{filter:brightness(.97)}
+.strip{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:baseline}
+.strip b{font-family:var(--f-display);font-size:22px}
+.strip span{color:var(--muted);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 10px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font-weight:600;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-family:var(--f-display);font-size:12px;letter-spacing:.04em;text-transform:uppercase;background:var(--bg);position:sticky;top:0}
+td.n,th.n{width:44px;position:sticky;left:0;background:var(--surface);z-index:1}
+td.nm,th.nm{text-align:left;position:sticky;left:44px;background:var(--surface);z-index:1;min-width:220px;max-width:280px;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--line)}
+th.n,th.nm{background:var(--bg);z-index:2}
+tr.me td{background:var(--accent-soft)}
+tr.me td.n,tr.me td.nm{background:var(--accent-soft)}
+td.on{color:var(--accent);font-weight:700}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.pill.LENGKAP{background:var(--accent-soft);color:var(--accent)}
+.pill.SEBAGIAN{background:var(--warn-bg);color:var(--warn)}
+.pill.BELUM{background:var(--bad-bg);color:var(--bad)}
+.act{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:9px;font-weight:600;z-index:20;max-width:90vw}
+@media (max-width:620px){
+  .row{grid-template-columns:1fr auto}
+  .row .tg{grid-column:1 / -1;order:3}
+  .row.vote{grid-template-columns:1fr auto}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div>
+    <div class="org">Bidang Konservasi dan Pertamanan · DLH Kota Probolinggo</div>
+    <h1>Rekap We Love Cities 2026</h1>
+  </div>
+  <div class="day" role="group" aria-label="Pilih hari">
+    <button id="dm" aria-label="Hari sebelumnya">−</button>
+    <output id="dv" aria-live="polite">Hari ke-1</output>
+    <button id="dp" aria-label="Hari berikutnya">+</button>
+  </div>
+</header>
+<div id="banner" class="banner" hidden></div>
+<nav role="tablist">
+  <button role="tab" id="tab-isi" aria-selected="true" data-tab="isi">Isi data saya</button>
+  <button role="tab" id="tab-rekap" aria-selected="false" data-tab="rekap">Rekap tim</button>
+  <button role="tab" id="tab-lap" aria-selected="false" data-tab="lap">Laporan</button>
+</nav>
+<main>
+  <section class="panel" id="p-isi">
+    <div class="card">
+      <div class="who-row">
+        <div class="pick">
+          <label class="lbl" for="who">Nama Anda</label>
+          <select id="who"><option value="">Pilih nama…</option></select>
+        </div>
+        <div>
+          <div class="score" id="score">0<small> / 13</small></div>
+          <div class="bar" style="width:140px"><i id="sbar"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="form" id="form"></div>
+    <p class="hint">Centang setelah Anda benar-benar selesai di platform tersebut. Setiap ketukan tersimpan otomatis dan langsung terlihat di rekap tim.</p>
+    <details class="links" id="linkbox">
+      <summary>Atur tautan postingan hari ini (pengelola)</summary>
+      <div class="card"><div class="lk" id="lk"></div>
+        <div class="act"><button class="btn pri" id="lksave">Simpan tautan</button></div></div>
+    </details>
+  </section>
+
+  <section class="panel" id="p-rekap" hidden>
+    <div class="card">
+      <div class="strip" id="strip"></div>
+      <div class="bar"><i id="rbar"></i></div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="scroll"><table id="tbl"></table></div>
+  </section>
+
+  <section class="panel" id="p-lap" hidden>
+    <div class="card">
+      <h2 style="font-size:20px">Laporan semua hari</h2>
+      <p class="hint" style="margin-top:6px">File Excel berisi satu lembar Ringkasan (per orang, per hari) dan satu lembar rekap untuk setiap hari, dengan susunan kolom yang sama seperti rekap manual.</p>
+      <div class="act">
+        <button class="btn pri" id="xl">Unduh laporan (.xlsx)</button>
+        <button class="btn" id="csv">Unduh hari ini (.csv)</button>
+        <button class="btn" id="reload">Muat ulang ringkasan</button>
+      </div>
+    </div>
+    <div class="scroll" style="margin-top:16px"><table id="sum"></table></div>
+  </section>
+</main>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const NAMES = [[1, "EKO PRASETYO OCKTAVIANTO, S.Sos., M.S.A."], [2, "DANY SETYA WARDANA"], [3, "SHOLEH HUDIN"], [4, "YOYOK SOLFIANTO, S.Sos"], [5, "ENDRI HARI HERIYANTO"], [6, "NURHASAN, S.AP"], [7, "ALIFIA ROCHMAWATI"], [8, "AGUS YATIM RIYANTO"], [9, "FAJAR HARIYANTO"], [10, "ASNAWI"], [11, "MARMO"], [12, "HERWANTO"], [13, "SUBANDI"], [14, "TOHARI"], [15, "SUJONO"], [16, "MUJIONO"], [17, "MISRAN"], [18, "SUGIARTO"], [19, "EKO CAHYONO"], [20, "SUTIP ADIWIJAYA"], [21, "JUARNO"], [22, "RIZKI WIDYA KUSUNAWARDANI, A.Md."], [23, "TRAYU WIJARNINDYA, SP"], [24, "IWAN WIDIARTO, ST"], [25, "WILLIS  PUTRI INDRESWARI"], [26, "DEWI PUSPITA SARI"], [27, "NURRHOSY KUSNANDAR, SH"], [28, "ZAKA PUTRA HADI KUSUMA,  S.Sos"], [29, "WARIS WICAKSONO"], [30, "ANDI WIDJAYA"], [31, "IMAM MASHURI"], [32, "FANDI ACHMAD"], [33, "ANDHY EKO ERVIYANTO"], [34, "SURYA EKAWARA PUTRA"], [35, "ALI HURROZIM"], [36, "MOHAMMAD ZAINUDIN ARIF"], [37, "ABDUR ROHMAN"], [38, "DIAN SIGIT ANTONI"], [39, "NURUL ISLAM"], [40, "BAMBANG SETIAWAN"], [41, "GUNTUR AGUS PRIYANTO"], [42, "WANDY SETIAWAN"], [43, "MUSTOFA"], [44, "ABDUL ROHIM"], [45, "MUCHAMMAD YUSUF"], [46, "MOH. FIRDAUS"], [47, "UDIN PRASTIYO"], [48, "SENDI SUHARTONO"], [49, "SUGIONO"], [50, "SOLIHIN"], [51, "PURWANTO"], [52, "AHMAD TAUFIQ"], [53, "RUDI HERMANTO"], [54, "CAHYO BUDI PRATOMO"], [55, "FARIS ALFAROSI"], [56, "MEDIAN JULI  MARIO WIRADI, S.AP"], [57, "MAHDUR ULUM"], [58, "MUHAMMAD ABDUL KHOLIQ, S.AP"], [59, "IRFAN EFENDI, S.AP"], [60, "CANDRA DIAN LESMANA, S.AP"], [61, "AMANG SUGIARTO"], [62, "FANI DWI KURNIAWAN"], [63, "HENDRA YOGI PRATAMA"], [64, "KHAIRUL ANAM"], [65, "DANNY ISWAN"], [66, "IWAN SUDARYANTO, S.Sos"], [67, "YUDI ARISKA"], [68, "HAYATULLAH"], [69, "MOHAMMAD THOHA"], [70, "VERY  KRISWANTO"], [71, "AGUNG EKO WAHYUDI"], [72, "PRANATA HENDRA AIRLANGGA"], [73, "TRI BANGKIT"]];
+const PF = [["ig","Instagram"],["fb","Facebook"],["tt","TikTok"],["yt","YouTube"]];
+const AX = [["l","Like"],["k","Komen"],["s","Share"]];
+const KEYS = ["vote"]; PF.forEach(([p])=>AX.forEach(([a])=>KEYS.push(p+"_"+a)));
+const MAX = KEYS.length; // 13
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ====== PENGATURAN ======
+   Isi API_URL dengan alamat Web App Google Apps Script (lihat PETUNJUK.md) agar data dipakai bersama.
+   Dikosongkan = mode lokal (data hanya di perangkat ini, cocok untuk uji coba). */
+const API_URL = "";
+const POLL_MS = 10000;
+let allData=null, linksAll={};
+let day=1, tab="isi", who=0, filter="ALL";
+let docs={}, links={}, inflight={}, dirty={};
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2400)}
+function banner(t){const b=$("#banner");b.textContent=t||"";b.hidden=!t}
+const count = c=>KEYS.reduce((n,k)=>n+(c&&c[k]?1:0),0);
+const status = n=>n>=MAX?"LENGKAP":n===0?"BELUM":"SEBAGIAN";
+const stLabel = {LENGKAP:"Lengkap",SEBAGIAN:"Sebagian",BELUM:"Belum"};
+
+/* ---------- Isi data ---------- */
+function buildWho(){
+  const s=$("#who");
+  NAMES.forEach(([n,nm])=>{const o=document.createElement("option");o.value=n;o.textContent=n+". "+nm;s.appendChild(o)});
+  const saved=+store.get("wlc_who")||0; if(saved&&NAMES.some(x=>x[0]===saved)){who=saved;s.value=saved}
+  s.addEventListener("change",()=>{who=+s.value||0;store.set("wlc_who",who);renderIsi()});
+}
+function safeUrl(u){try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return ""}}
+function renderIsi(){
+  const f=$("#form"); f.innerHTML="";
+  const c=docs[who]||{}; const off=!who;
+  const mk=(key,label,url)=>{
+    const wrap=document.createElement("div"); wrap.className="row"+(key==="vote"?" vote":"");
+    const pf=document.createElement("div"); pf.className="pf"; pf.textContent=label; wrap.appendChild(pf);
+    const tg=document.createElement("div"); tg.className="tg"; wrap.appendChild(tg);
+    return {wrap,tg,url};
+  };
+  const linkEl=(url)=>{
+    if(url){const a=document.createElement("a");a.className="open";a.href=url;a.target="_blank";a.rel="noopener";a.textContent="Buka ↗";return a}
+    const s=document.createElement("span");s.className="open-off";s.textContent="belum ada tautan";return s;
+  };
+  const addToggle=(tg,key,text)=>{
+    const b=document.createElement("button");b.className="t";b.type="button";b.textContent=text;
+    b.setAttribute("aria-pressed",c[key]?"true":"false");b.disabled=off;b.dataset.k=key;
+    b.addEventListener("click",()=>toggle(key));tg.appendChild(b);
+  };
+  // vote
+  {const r=mk("vote","Vote");addToggle(r.tg,"vote","Sudah vote");
+   // place link after toggles by moving tg before link
+   r.wrap.insertBefore(r.tg,null); r.wrap.appendChild(linkEl(safeUrl(links.vote)));f.appendChild(r.wrap);}
+  PF.forEach(([p,name])=>{
+    const r=mk(p,name);
+    AX.forEach(([a,t])=>addToggle(r.tg,p+"_"+a,t));
+    r.wrap.appendChild(linkEl(safeUrl(links[p])));f.appendChild(r.wrap);
+  });
+  const n=count(c);
+  $("#score").innerHTML=n+'<small> / '+MAX+'</small>';
+  $("#sbar").style.width=(n/MAX*100)+"%";
+  if(!who) $("#score").title="Pilih nama dulu";
+}
+function toggle(key){
+  if(!who) return;
+  const c=Object.assign({},docs[who]||{}); c[key]=!c[key]; docs[who]=c;
+  renderIsi(); renderRekap(); queueSave(who);
+}
+function queueSave(no){
+  if(inflight[no]){dirty[no]=true;return}
+  inflight[no]=true; const d=day;
+  const nm=(NAMES.find(x=>x[0]===no)||[0,""])[1];
+  const c=Object.assign({},docs[no]||{});
+  (allData[d]=allData[d]||{})[no]=c;
+  B.put(d,no,nm,c)
+    .catch(e=>{toast("Gagal menyimpan. Periksa sinyal, lalu ketuk lagi.");console.error(e)})
+    .finally(()=>{inflight[no]=false; if(dirty[no]){dirty[no]=false; if(d===day) queueSave(no)}});
+}
+
+/* ---------- Rekap ---------- */
+function renderRekap(){
+  const rows=NAMES.map(([n,nm])=>{const c=docs[n]||{};const t=count(c);return {n,nm,c,t,s:status(t)}});
+  const cnt={ALL:rows.length,LENGKAP:0,SEBAGIAN:0,BELUM:0}; rows.forEach(r=>cnt[r.s]++);
+  const tot=k=>rows.reduce((a,r)=>a+(r.c[k]?1:0),0);
+  const sumA=a=>PF.reduce((x,[p])=>x+tot(p+"_"+a),0);
+  $("#strip").innerHTML=
+    '<div><b>'+cnt.LENGKAP+'</b> <span>dari '+rows.length+' orang lengkap</span></div>'+
+    '<div><b>'+tot("vote")+'</b> <span>vote</span></div>'+
+    '<div><b>'+sumA("l")+'</b> <span>like</span></div>'+
+    '<div><b>'+sumA("k")+'</b> <span>komen</span></div>'+
+    '<div><b>'+sumA("s")+'</b> <span>share</span></div>';
+  $("#rbar").style.width=(cnt.LENGKAP/rows.length*100)+"%";
+  const ch=$("#chips"); ch.innerHTML="";
+  [["ALL","Semua"],["BELUM","Belum"],["SEBAGIAN","Sebagian"],["LENGKAP","Lengkap"]].forEach(([k,l])=>{
+    const b=document.createElement("button");b.className="chip";b.type="button";b.textContent=l+" "+cnt[k];
+    b.setAttribute("aria-pressed",filter===k?"true":"false");b.onclick=()=>{filter=k;renderRekap()};ch.appendChild(b);
+  });
+  let h='<thead><tr><th class="n" rowspan="2">No</th><th class="nm" rowspan="2">Nama</th><th rowspan="2">Vote</th>';
+  PF.forEach(([p,nm])=>h+='<th colspan="3">'+nm+'</th>');
+  h+='<th rowspan="2">Total</th><th rowspan="2">Status</th></tr><tr>';
+  PF.forEach(()=>AX.forEach(([a])=>h+='<th>'+a.toUpperCase()+'</th>'));
+  h+='</tr></thead><tbody>';
+  const mark=(c,k)=>'<td class="'+(c[k]?"on":"")+'">'+(c[k]?"✓":"")+'</td>';
+  const shown=rows.filter(r=>filter==="ALL"||r.s===filter);
+  shown.forEach(r=>{
+    h+='<tr'+(r.n===who?' class="me"':'')+'><td class="n">'+r.n+'</td><td class="nm" title="'+esc(r.nm)+'">'+esc(r.nm)+'</td>'+mark(r.c,"vote");
+    PF.forEach(([p])=>AX.forEach(([a])=>h+=mark(r.c,p+"_"+a)));
+    h+='<td><b>'+r.t+'</b></td><td><span class="pill '+r.s+'">'+stLabel[r.s]+'</span></td></tr>';
+  });
+  if(!shown.length) h+='<tr><td colspan="17" class="empty">Tidak ada nama pada filter ini.</td></tr>';
+  $("#tbl").innerHTML=h+'</tbody>';
+}
+
+/* ---------- Penyimpanan ---------- */
+const LKEY="wlc_local_v1";
+const B={
+  api:!!API_URL,
+  localRead(){try{return JSON.parse(localStorage.getItem(LKEY))||{rows:{},links:{}}}catch(e){return {rows:{},links:{}}}},
+  localWrite(o){try{localStorage.setItem(LKEY,JSON.stringify(o))}catch(e){}},
+  async load(){
+    let rows=[],links={};
+    if(this.api){
+      const r=await fetch(API_URL+"?action=all&_="+Date.now()); const j=await r.json();
+      rows=j.rows||[]; links=j.links||{};
+    }else{
+      const o=this.localRead(); links=o.links||{};
+      Object.keys(o.rows).forEach(k=>{const [d,n]=k.split("_");rows.push({day:+d,no:+n,c:o.rows[k]})});
+    }
+    const byDay={};
+    rows.forEach(x=>{(byDay[x.day]=byDay[x.day]||{})[x.no]=(typeof x.c==="string"?JSON.parse(x.c||"{}"):x.c)||{}});
+    return {byDay,links};
+  },
+  async put(d,no,nama,c){
+    if(this.api){
+      const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"set",day:d,no,nama,c})});
+      const j=await r.json(); if(!j.ok) throw new Error(j.error||"gagal");
+    }else{const o=this.localRead();o.rows[d+"_"+no]=c;this.localWrite(o)}
+  },
+  async putLinks(d,obj,pin){
+    if(this.api){
+      const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"links",day:d,links:obj,pin})});
+      const j=await r.json(); if(!j.ok) throw new Error(j.error||"gagal");
+    }else{const o=this.localRead();o.links[d]=obj;this.localWrite(o)}
+  }
+};
+async function sync(){
+  try{
+    const r=await B.load(); allData=r.byDay; linksAll=r.links;
+    if(!B.api) banner("Mode lokal: centang hanya tersimpan di perangkat ini. Isi API_URL di index.html agar dipakai bersama satu tim.");
+    else banner("");
+    applyDay();
+  }catch(e){console.error(e);banner("Tidak bisa terhubung ke penyimpanan. Periksa sinyal atau alamat API_URL.")}
+}
+function applyDay(){
+  const next=Object.assign({},(allData&&allData[day])||{});
+  Object.keys(inflight).forEach(n=>{if(inflight[n]&&docs[n]) next[n]=docs[n]});
+  docs=next; links=linksAll[day]||{};
+  renderIsi(); renderRekap(); renderLinkEditor(); if(tab==="lap") renderSum();
+}
+function renderLinkEditor(){
+  const lk=$("#lk"); const sig=String(day)+JSON.stringify(links);
+  if(lk.dataset.sig===sig) return; lk.dataset.sig=sig; lk.innerHTML="";
+  [["vote","Vote"],["ig","Instagram"],["fb","Facebook"],["tt","TikTok"],["yt","YouTube"]].forEach(([k,l])=>{
+    const w=document.createElement("div");
+    w.innerHTML='<label class="lbl" for="lk_'+k+'">'+l+'</label><input type="url" id="lk_'+k+'" placeholder="https://…">';
+    w.querySelector("input").value=links[k]||"";lk.appendChild(w);
+  });
+  if(B.api){const w=document.createElement("div");
+    w.innerHTML='<label class="lbl" for="lk_pin">PIN pengelola</label><input type="password" id="lk_pin" autocomplete="off">';lk.appendChild(w)}
+}
+
+/* ---------- Laporan ---------- */
+async function loadAll(){
+  $("#sum").innerHTML='<tbody><tr><td class="empty">Memuat…</td></tr></tbody>';
+  await sync(); renderSum();
+}
+function dayStats(m){
+  let leng=0,vote=0,L=0,K=0,S=0,isi=0;
+  NAMES.forEach(([n])=>{const c=m[n]||{};const t=count(c);if(t)isi++;if(t>=MAX)leng++;if(c.vote)vote++;
+    PF.forEach(([p])=>{if(c[p+"_l"])L++;if(c[p+"_k"])K++;if(c[p+"_s"])S++})});
+  return {leng,vote,L,K,S,isi};
+}
+function renderSum(){
+  const days=Object.keys(allData||{}).map(Number).sort((a,b)=>a-b);
+  if(!days.length){$("#sum").innerHTML='<tbody><tr><td class="empty">Belum ada data yang diisi. Setelah tim mulai mencentang, ringkasan per hari muncul di sini.</td></tr></tbody>';return}
+  let h='<thead><tr><th>Hari</th><th>Mengisi</th><th>Lengkap</th><th>Vote</th><th>Like</th><th>Komen</th><th>Share</th></tr></thead><tbody>';
+  days.forEach(d=>{const s=dayStats(allData[d]);h+='<tr><td><b>Hari ke-'+d+'</b></td><td>'+s.isi+' / '+NAMES.length+'</td><td>'+s.leng+'</td><td>'+s.vote+'</td><td>'+s.L+'</td><td>'+s.K+'</td><td>'+s.S+'</td></tr>'});
+  $("#sum").innerHTML=h+'</tbody>';
+}
+function dayAOA(d,m){
+  const a=[["REKAPITULASI VOTE. LIKE. KOMEN. & SHARE WE LOVE CITIES 2026"],["BIDANG KONSERVASI DAN PERTAMANAN"],["DINAS LINGKUNGAN HIDUP KOTA PROBOLINGGO"],["HARI KE-"+d],[]];
+  const h1=["NO","NAMA","VOTE"]; PF.forEach(([p,n])=>h1.push(n.toUpperCase(),"",""));h1.push("TOTAL","STATUS");
+  const h2=["","",""]; PF.forEach(()=>AX.forEach(([x])=>h2.push(x.toUpperCase()))); h2.push("","");
+  a.push(h1,h2);
+  NAMES.forEach(([n,nm])=>{const c=m[n]||{};const t=count(c);
+    const r=[n,nm,c.vote?"v":""]; PF.forEach(([p])=>AX.forEach(([x])=>r.push(c[p+"_"+x]?"v":""))); r.push(t,stLabel[status(t)].toUpperCase()); a.push(r)});
+  const tr=["","JUMLAH"]; for(let i=2;i<14;i++){const k=KEYS[i-2]; tr.push(NAMES.reduce((q,[n])=>q+((m[n]||{})[k]?1:0),0))}
+  tr.push(NAMES.reduce((q,[n])=>q+count(m[n]),0),""); a.push(tr);
+  return a;
+}
+function buildWorkbook(){
+  const days=Object.keys(allData).map(Number).sort((a,b)=>a-b);
+  const wb=XLSX.utils.book_new();
+  const head=[["LAPORAN REKAPITULASI WE LOVE CITIES 2026"],["BIDANG KONSERVASI DAN PERTAMANAN"],["DINAS LINGKUNGAN HIDUP KOTA PROBOLINGGO"],[]];
+  const hr=["NO","NAMA"]; days.forEach(d=>hr.push("HARI "+d)); hr.push("TOTAL AKSI","MAKS","PERSEN");
+  const rows=[...head,hr];
+  NAMES.forEach(([n,nm])=>{const r=[n,nm];let t=0;days.forEach(d=>{const x=count((allData[d]||{})[n]);t+=x;r.push(x)});
+    const mx=MAX*days.length;r.push(t,mx,mx?Math.round(t/mx*1000)/10+"%":"");rows.push(r)});
+  const sr=["","JUMLAH LENGKAP / HARI"]; days.forEach(d=>sr.push(dayStats(allData[d]).leng)); rows.push(sr);
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws["!cols"]=[{wch:5},{wch:48},...days.map(()=>({wch:9})),{wch:12},{wch:8},{wch:9}];
+  ws["!merges"]=[0,1,2].map(r=>({s:{r,c:0},e:{r,c:Math.max(5,days.length+4)}}));
+  XLSX.utils.book_append_sheet(wb,ws,"Ringkasan");
+  days.forEach(d=>{
+    const w=XLSX.utils.aoa_to_sheet(dayAOA(d,allData[d]));
+    w["!cols"]=[{wch:5},{wch:48},{wch:7},...Array(12).fill({wch:5}),{wch:8},{wch:11}];
+    const mg=[0,1,2,3].map(r=>({s:{r,c:0},e:{r,c:16}}));
+    mg.push({s:{r:5,c:0},e:{r:6,c:0}},{s:{r:5,c:1},e:{r:6,c:1}},{s:{r:5,c:2},e:{r:6,c:2}},{s:{r:5,c:15},e:{r:6,c:15}},{s:{r:5,c:16},e:{r:6,c:16}});
+    [3,6,9,12].forEach(c=>mg.push({s:{r:5,c},e:{r:5,c:c+2}}));
+    w["!merges"]=mg; w["!freeze"]={xSplit:2,ySplit:7};
+    XLSX.utils.book_append_sheet(wb,w,"Hari "+d);
+  });
+  return wb;
+}
+async function exportXlsx(){
+  if(!allData) await sync();
+  if(!allData||!Object.keys(allData).length){toast("Belum ada data untuk dilaporkan");return}
+  XLSX.writeFile(buildWorkbook(),"Laporan_WeLoveCities_2026.xlsx");
+}
+function exportCsv(){
+  const csv="\ufeff"+XLSX.utils.sheet_to_csv(XLSX.utils.aoa_to_sheet(dayAOA(day,docs)));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="Rekap_WeLoveCities_Hari"+day+".csv";document.body.appendChild(a);a.click();a.remove();
+}
+
+/* ---------- Wiring ---------- */
+function setDay(d){
+  day=Math.min(60,Math.max(1,d)); store.set("wlc_day",day);
+  $("#dv").textContent="Hari ke-"+day; applyDay();
+}
+function setTab(t){
+  tab=t; store.set("wlc_tab",t);
+  ["isi","rekap","lap"].forEach(k=>{$("#p-"+k).hidden=k!==t;$("#tab-"+k).setAttribute("aria-selected",k===t?"true":"false")});
+  if(t==="lap"&&!allData) loadAll();
+}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+$("#dm").onclick=()=>setDay(day-1); $("#dp").onclick=()=>setDay(day+1);
+$("#xl").onclick=exportXlsx; $("#csv").onclick=exportCsv; $("#reload").onclick=loadAll;
+$("#lksave").onclick=async()=>{
+  const o={};["vote","ig","fb","tt","yt"].forEach(k=>{o[k]=safeUrl($("#lk_"+k).value.trim())});
+  const pin=$("#lk_pin")?$("#lk_pin").value:"";
+  try{await B.putLinks(day,o,pin);linksAll[day]=o;links=o;renderIsi();toast("Tautan tersimpan")}
+  catch(e){toast("Gagal menyimpan tautan. Periksa PIN.")}
+};
+buildWho();
+day=+store.get("wlc_day")||1; $("#dv").textContent="Hari ke-"+day;
+setTab(store.get("wlc_tab")||"isi");
+renderIsi(); renderRekap();
+sync();
+setInterval(()=>{if(!document.hidden&&!Object.values(inflight).some(Boolean)) sync()},POLL_MS);
+</script>
+</body>
+</html>
