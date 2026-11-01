@@ -189,7 +189,7 @@ const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;
 /* ====== PENGATURAN ======
    Isi API_URL dengan alamat Web App Google Apps Script (lihat PETUNJUK.md) agar data dipakai bersama.
    Dikosongkan = mode lokal (data hanya di perangkat ini, cocok untuk uji coba). */
-const API_URL = "";
+const API_URL = "https://script.google.com/macros/s/AKfycbxPBH8HYblWiT2YvZvAYBlHgpV2uchh0jKMqCIAGt7BfshhoS7rAzPArJDVY6-bikuUZQ/exec";
 const POLL_MS = 10000;
 let allData=null, linksAll={};
 let day=1, tab="isi", who=0, filter="ALL";
